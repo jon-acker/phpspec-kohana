@@ -1,0 +1,30 @@
+{
+    "name": "phpspec/kohana-extension",
+    "description": "Kohana 3.0 extension for phpspec",
+    "type": "library",
+    "keywords": ["phpspec", "kohana"],
+    "homepage": "https://github.com/jon-acker/phpspec-kohana"
+    "license": "MIT",
+    "require": {
+        "php": ">=5.3.3",
+        "phpspec/phpspec": "dev-master"
+    },
+    "require-dev": {
+        "behat/behat": "*",
+        "bossa/phpspec2-expect": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "PhpSpec\\Kohana": "src/"
+        }
+    },
+    "config": {
+        "bin-dir": "bin"
+    },
+    "authors": [
+        {
+            "name": "Jon Acker",
+            "email": "jacker@inviqa.com"
+        }
+    ]
+}
