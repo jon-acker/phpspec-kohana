@@ -3,7 +3,7 @@
     "description": "Kohana 3.0 extension for phpspec",
     "type": "library",
     "keywords": ["phpspec", "kohana"],
-    "homepage": "https://github.com/jon-acker/phpspec-kohana"
+    "homepage": "https://github.com/jon-acker/phpspec-kohana",
     "license": "MIT",
     "require": {
         "php": ">=5.3.3",
