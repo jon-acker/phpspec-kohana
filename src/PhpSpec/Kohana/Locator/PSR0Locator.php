@@ -2,6 +2,7 @@
 
 namespace PhpSpec\Kohana\Locator;
 
+use PhpSpec\Exception\Exception;
 use PhpSpec\Locator\ResourceInterface;
 use PhpSpec\Locator\ResourceLocatorInterface;
 use PhpSpec\Util\Filesystem;
@@ -80,7 +81,17 @@ class PSR0Locator implements ResourceLocatorInterface
      */
     public function supportsQuery($query)
     {
-        // TODO: Implement supportsQuery() method.
+        $fullPath = realpath($query);
+
+        if (is_file($fullPath) && '.php' !== substr($query, -4)) {
+            throw new Exception('File type not supported');
+        }
+
+        if (!is_dir(realpath($fullPath))) {
+            throw new Exception($query. ' is not a valid directory');
+        }
+
+        return true;
     }
 
     /**
@@ -90,9 +101,21 @@ class PSR0Locator implements ResourceLocatorInterface
      */
     public function findResources($query)
     {
-        echo 'find'; var_dump($query);
+        $fullQueryPath = realpath($query);
 
-        // TODO: Implement findResources() method.
+        $fullSpecPath = rtrim(realpath(str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $this->specPath)), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        if ('.php' === substr($query, -4)) {
+            return array($this->createResourceFromSpecFile($fullQueryPath, $fullSpecPath));
+        }
+
+        foreach ($this->filesystem->findPhpFilesIn($fullQueryPath) as $file) {
+
+            $specFile = $file->getRealPath();
+            $resources[] = $this->createResourceFromSpecFile($specFile, $fullSpecPath);
+        }
+
+        return $resources;
     }
 
     /**
@@ -104,7 +127,7 @@ class PSR0Locator implements ResourceLocatorInterface
     {
         $supports = preg_match('/^(([a-zA-Z0-9]+)_?)+$/', $classname);
 
-        return false;
+        return $supports;
     }
 
     /**
@@ -128,7 +151,7 @@ class PSR0Locator implements ResourceLocatorInterface
      */
     public function getPriority()
     {
-        return 10;
+        return 0;
     }
 
     public function getSrcPath()
