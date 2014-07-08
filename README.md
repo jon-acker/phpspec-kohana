@@ -26,3 +26,10 @@ Create a composer.json file:
 cp vendor/phpspec/kohana-extension/phpspec.yml.dist phpspec.yml
 ```
 
+```
+bin/phpspec describe Acme_Driver_Formatter
+```
+
+```
+bin/phpspec run
+```
