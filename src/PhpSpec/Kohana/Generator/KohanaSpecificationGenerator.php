@@ -26,7 +26,7 @@ class KohanaSpecificationGenerator extends SpecificationGenerator
      */
     public function getPriority()
     {
-        return 10;
+        return 0;
     }
 
     /**

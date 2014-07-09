@@ -35,11 +35,6 @@ class PSR0Locator implements ResourceLocatorInterface
     private $filesystem;
 
     /**
-     * @var ResourceFactory
-     */
-    private $resourceFactory;
-
-    /**
      * @param string          $srcNamespace
      * @param string          $specSubNamespace
      * @param string          $srcPath
@@ -87,10 +82,6 @@ class PSR0Locator implements ResourceLocatorInterface
             throw new Exception('File type not supported');
         }
 
-        if (!is_dir(realpath($fullPath))) {
-            throw new Exception($query. ' is not a valid directory');
-        }
-
         return true;
     }
 
@@ -110,7 +101,6 @@ class PSR0Locator implements ResourceLocatorInterface
         }
 
         foreach ($this->filesystem->findPhpFilesIn($fullQueryPath) as $file) {
-
             $specFile = $file->getRealPath();
             $resources[] = $this->createResourceFromSpecFile($specFile, $fullSpecPath);
         }

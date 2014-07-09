@@ -28,7 +28,7 @@ class KohanaCodeGenerator extends ClassGenerator
      */
     public function getPriority()
     {
-        return 10;
+        return 0;
     }
 
     /**
