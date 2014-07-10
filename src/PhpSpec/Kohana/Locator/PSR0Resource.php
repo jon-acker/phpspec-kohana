@@ -6,25 +6,37 @@ use PhpSpec\Locator\ResourceInterface;
 
 class PSR0Resource implements ResourceInterface
 {
+    /**
+     * @var array Namespace parts
+     */
     private $parts;
 
-    private $srcPath;
+    /**
+     * @var PSR0Locator
+     */
+    private $locator;
 
-    private $specPath;
+    /**
+     * @var string
+     */
+    private $specifiedClass;
 
-    private $specNamespace;
 
-    public function __construct(array $namespaceParts, PSR0Locator $locator)
+    /**
+     * @param array $namespaceParts
+     * @param PSR0Locator $locator
+     * @param string $specifiedClass
+     */
+    public function __construct(array $namespaceParts, PSR0Locator $locator, $specifiedClass)
     {
         $this->parts   = $namespaceParts;
-        $this->srcPath = $locator->getSrcPath();
-        $this->specPath = $locator->getSpecPath();
-        $this->specNamespace = $locator->getSpecNamespace();
+        $this->locator = $locator;
+        $this->specifiedClass = $specifiedClass;
     }
 
     public function getName()
     {
-        return $this->ucClass($this->parts);
+        return $this->specifiedClass;
     }
 
     public function getSpecName()
@@ -34,7 +46,7 @@ class PSR0Resource implements ResourceInterface
 
     public function getSrcFilename()
     {
-        return $this->srcPath . implode(DIRECTORY_SEPARATOR, $this->parts) . '.php';
+        return $this->locator->getSrcPath() . implode(DIRECTORY_SEPARATOR, $this->parts) . '.php';
     }
 
     public function getSrcNamespace()
@@ -44,33 +56,21 @@ class PSR0Resource implements ResourceInterface
 
     public function getSrcClassname()
     {
-        return $this->ucClass($this->parts);
+        return $this->specifiedClass;
     }
 
     public function getSpecFilename()
     {
-        return $this->specPath . implode(DIRECTORY_SEPARATOR, $this->parts) . 'Spec.php';
+        return $this->locator->getSpecPath() . implode(DIRECTORY_SEPARATOR, $this->parts) . 'Spec.php';
     }
 
     public function getSpecNamespace()
     {
-        return $this->specNamespace;
+        return $this->locator->getSpecNamespace();
     }
 
     public function getSpecClassname()
     {
-        return $this->ucClass($this->parts).'Spec';
-    }
-
-    /**
-     * @param array $parts
-     *
-     * @return string
-     */
-    private function ucClass($parts)
-    {
-        return implode('_', array_map(function ($part) {
-            return ucfirst($part);
-        }, $parts));
+        return $this->specifiedClass.'Spec';
     }
 }

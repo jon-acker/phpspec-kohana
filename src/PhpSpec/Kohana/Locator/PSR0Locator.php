@@ -35,11 +35,16 @@ class PSR0Locator implements ResourceLocatorInterface
     private $filesystem;
 
     /**
-     * @param string          $srcNamespace
-     * @param string          $specSubNamespace
-     * @param string          $srcPath
-     * @param array           $specPaths
-     * @param Filesystem      $filesystem
+     * @var Class to be spec'd
+     */
+    private $specifiedClass;
+
+    /**
+     * @param string $srcNamespace
+     * @param string $specSubNamespace
+     * @param string $srcPath
+     * @param string $specPath
+     * @param Filesystem $filesystem
      */
     public function __construct($srcNamespace = '', $specSubNamespace = 'Spec', $srcPath, $specPath, Filesystem $filesystem = null)
     {
@@ -51,20 +56,14 @@ class PSR0Locator implements ResourceLocatorInterface
         $this->srcPath = $srcPath;
     }
 
-
     /**
      * @return ResourceInterface[]
      */
     public function getAllResources()
     {
-        $fullSpecPath = rtrim(realpath(str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $this->specPath)), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        $resources = array();
+        $fullSpecPath = $this->getFullSpecPath();
 
-        foreach ($this->filesystem->findPhpFilesIn($fullSpecPath) as $file) {
-
-            $specFile = $file->getRealPath();
-            $resources[] = $this->createResourceFromSpecFile($specFile, $fullSpecPath);
-        }
+        $resources = $this->createResourcesFromSpecFiles($fullSpecPath);
 
         return $resources;
     }
@@ -72,7 +71,9 @@ class PSR0Locator implements ResourceLocatorInterface
     /**
      * @param string $query
      *
-     * @return boolean
+     * @return bool
+     *
+     * @throws Exception
      */
     public function supportsQuery($query)
     {
@@ -94,15 +95,12 @@ class PSR0Locator implements ResourceLocatorInterface
     {
         $fullQueryPath = realpath($query);
 
-        $fullSpecPath = rtrim(realpath(str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $this->specPath)), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $fullSpecPath = $this->getFullSpecPath();
 
         if ('.php' === substr($query, -4)) {
-            return array($this->createResourceFromSpecFile($fullQueryPath, $fullSpecPath));
-        }
-
-        foreach ($this->filesystem->findPhpFilesIn($fullQueryPath) as $file) {
-            $specFile = $file->getRealPath();
-            $resources[] = $this->createResourceFromSpecFile($specFile, $fullSpecPath);
+            $resources = array($this->createResourceFromSpecFile($fullQueryPath, $fullSpecPath));
+        } else {
+            $resources = $this->createResourcesFromSpecFiles($fullSpecPath);
         }
 
         return $resources;
@@ -115,9 +113,9 @@ class PSR0Locator implements ResourceLocatorInterface
      */
     public function supportsClass($classname)
     {
-        $supports = preg_match('/^(([a-zA-Z0-9]+)_?)+$/', $classname);
+        $isSupported = preg_match('/^(([a-zA-Z0-9]+)_?)+$/', $classname);
 
-        return $supports;
+        return $isSupported;
     }
 
     /**
@@ -127,13 +125,11 @@ class PSR0Locator implements ResourceLocatorInterface
      */
     public function createResource($classname)
     {
-        $parts = preg_split('/_/', $classname);
-
         $parts = array_map(function($part) {
-            return lcfirst($part);
-        }, $parts);
+            return strtolower($part);
+        }, preg_split('/_/', $classname));
 
-        return new PSR0Resource($parts, $this);
+        return new PSR0Resource($parts, $this, $classname);
     }
 
     /**
@@ -144,36 +140,79 @@ class PSR0Locator implements ResourceLocatorInterface
         return 0;
     }
 
+    /**
+     * @return string
+     */
     public function getSrcPath()
     {
         return $this->srcPath;
     }
 
+    /**
+     * @return string
+     */
     public function getSpecPath()
     {
-
         return $this->specPath;
     }
 
+    /**
+     * @return string
+     */
     public function getSpecNamespace()
     {
         return $this->specSubNamespace;
     }
 
     /**
-     * @param string $path
+     * @return string
+     */
+    public function getSpecifiedClass()
+    {
+        return $this->specifiedClass;
+    }
+
+    /**
+     * @param $specPath
+     * @param $fullSpecPath
      *
-     * @return PSR0Resource|null
+     * @return null|ResourceInterface
+     *
+     * @throws \PhpSpec\Exception\Exception
      */
     private function createResourceFromSpecFile($specPath, $fullSpecPath)
     {
-        $relativePath = substr($specPath, strlen($fullSpecPath), -4);
-        $relativePath = str_replace('Spec', '', $relativePath);
+        preg_match('/^class\s+([a-zA-Z0-9_]+)Spec/m', file_get_contents($specPath), $matches);
 
-        $class = implode('_', array_map(function($part) {
-            return ucfirst($part);
-        }, preg_split('/\//', $relativePath)));
+        if (count($matches) < 2) {
+            throw new Exception('Could not create resource from ', $specPath);
+        }
 
-        return $this->createResource($class);
+        return $this->createResource($matches[1]);
+    }
+
+    /**
+     * @param $fullSpecPath
+     *
+     * @return array
+     */
+    private function createResourcesFromSpecFiles($fullSpecPath)
+    {
+        $resources = array();
+
+        foreach ($this->filesystem->findPhpFilesIn($fullSpecPath) as $file) {
+            $specFile = $file->getRealPath();
+            $resources[] = $this->createResourceFromSpecFile($specFile, $fullSpecPath);
+        }
+
+        return $resources;
+    }
+
+    /**
+     * @return string
+     */
+    private function getFullSpecPath()
+    {
+        return rtrim(realpath(str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $this->specPath)), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 }
