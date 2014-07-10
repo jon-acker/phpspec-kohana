@@ -38,4 +38,5 @@ You specify the applicaiton root in phpspec.yml, for example:
 application_root: public/application
 ```
 This will usually match the path you set for your composer autoload to search for classes.
+
 For documentation on how to use phpspec, see: http://www.phpspec.net/
