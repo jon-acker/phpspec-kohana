@@ -18,7 +18,7 @@ Create a composer.json file:
     "config": {
         "bin-dir": "bin"
     },
-    "autoload": {"psr-0": {"": "application/classes"}}
+    "autoload": {"psr-0": {"": "public/application/classes"}}
 }
 ```
 
@@ -33,3 +33,9 @@ bin/phpspec describe Acme_Driver_Formatter
 ```
 bin/phpspec run
 ```
+You specify the applicaiton root in phpspec.yml, for example:
+```
+application_root: public/application
+```
+This will usually match the path you set for your composer autoload to search for classes.
+For documentation on how to use phpspec, see: http://www.phpspec.net/
