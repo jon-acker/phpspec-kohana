@@ -1,2 +1,4 @@
+application_root: public/application
+
 extensions:
     - PhpSpec\Kohana\Extension

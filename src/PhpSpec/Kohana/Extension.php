@@ -17,10 +17,12 @@ class Extension implements ExtensionInterface
      */
     public function load(ServiceContainer $container)
     {
+
         $container->addConfigurator(function($c) {
             $c->setShared('locator.locators.kohana_locator',
                 function($c) {
-                    return new PSR0Locator(null, null, 'application/classes/', 'application/spec/');
+                    $applicationRoot = $c->getParam('application_root');
+                    return new PSR0Locator(null, null, $applicationRoot . '/classes/', $applicationRoot . '/spec/');
                 }
             );
         });
