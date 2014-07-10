@@ -6,14 +6,8 @@ Extension for using PhpSpec with Kohana framework
 Create a composer.json file:
 ```
 {
-   "repositories": [
-        {
-            "url": "https://github.com/jon-acker/phpspec-kohana.git",
-            "type": "git"
-        }
-    ],
     "require-dev": {
-        "phpspec/kohana-extension": "dev-master"
+        "phpspec/kohana-extension": "0.2.*"
     },
     "config": {
         "bin-dir": "bin"
