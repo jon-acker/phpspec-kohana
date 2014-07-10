@@ -18,7 +18,7 @@ Create a composer.json file:
     "config": {
         "bin-dir": "bin"
     },
-    "autoload": {"psr-0": {"": "src/"}}
+    "autoload": {"psr-0": {"": "application/classes"}}
 }
 ```
 
